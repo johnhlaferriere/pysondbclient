@@ -7,7 +7,7 @@ HOST, PORT = "localhost", 9999
 
 
 generator = "lambda: str(uuid.uuid4())"
-#generator = "lambda x: x['first'] == 'Bill'"
+#generator = "lambda: str(int(uuid.uuid4()))[:18]"
 
 def main() -> int:
 
