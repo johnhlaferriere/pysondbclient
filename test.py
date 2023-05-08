@@ -1,8 +1,6 @@
 
 
-
-from JsonClient import PysonDBClient
-
+from pysondb.client import PysonDBClient
 
 HOST, PORT = "localhost", 9999
 
