@@ -1,11 +1,19 @@
 
 
 from pysondb.client import PysonDBClient
+import uuid
 
 HOST, PORT = "localhost", 9999
 
 
+generator = "lambda: str(uuid.uuid4())"
+#generator = "lambda x: x['first'] == 'Bill'"
+
 def main() -> int:
+
+    #f = eval(generator)
+    #print (f())
+    #return 0
     s = PysonDBClient(HOST, PORT)
     s.connect()
     ok = True
@@ -22,6 +30,7 @@ def main() -> int:
                 #s.use_section("test2")
                 #print(s.add_new_key("first"))
                 #print(s.add_new_key("last"))
+                print (s.set_id_generator(generator))
                 print(s.add({"first":"Bill","last":"Smith"}))
                 print(s.add({"first":"Bill","last":"Davis"}))
                 print(s.add({"first":"Bill","last":"Harrison"}))

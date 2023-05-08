@@ -179,5 +179,8 @@ class PysonDBClient:
         self._dbname = dbname
         return retval
 
+    def set_id_generator(self,fn :any):
+        return self._check_error(self._send({"cmd":"SET_ID_GENERATOR","payload":{"fn":fn}}))
+
 
     
