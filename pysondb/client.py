@@ -1,6 +1,6 @@
 
 from concurrent.futures import thread
-#from distutils import pysondb.errors
+
 import socket, sys
 from threading import Thread
 import time
@@ -10,8 +10,7 @@ from typing import List
 from typing import Optional
 from typing import Union
 from typing import Dict
-
-
+#import pysondb.errors as errors
 from pysondb.db_types import DBSchemaType
 from pysondb.db_types import IdGeneratorType
 from pysondb.db_types import NewKeyValidTypes
@@ -28,13 +27,11 @@ from pysondb.errors import DatabaseNotFoundError
 from pysondb.errors import MalformedQueryError
 
 
-
 try:
     import ujson as json
-    #UJSON = True
 except ImportError:
     import json as json
-    #UJSON = False
+
 
 
 
@@ -54,7 +51,7 @@ class PysonDBClient:
   
 
         
-    def connect(self, retries=5) -> None:
+    def connect(self, retries=5) -> bool:
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if not self._connected:
             rCount = 0
@@ -65,8 +62,10 @@ class PysonDBClient:
             except:
                 time.sleep(self._wait)
                 rCount += 1
+        return self._connected
 
     def close(self) -> None:
+        self._sock.shutdown(socket.SHUT_RDWR)
         self._sock.close()
         self._connected = False
 
@@ -96,7 +95,7 @@ class PysonDBClient:
         if val["error"] == "NoError":
             return val["data"]
         else:
-            raise getattr(__import__("pysondb.errors"), val["error"])(val["data"])
+            raise getattr(getattr(__import__("pysondb.errors"),"errors"), val["error"])(val["data"])
 
     def _check_section(self,s) -> str:    
         if s == None and self._section == None:
@@ -106,7 +105,7 @@ class PysonDBClient:
     def add(self, data: object,section:str = None) -> str:
         return self._check_error(self._send({"cmd": "ADD", "payload":{"section":self._check_section(section),"data": data}}))
 
-    def add_many(self, data: object, section : str = None, json_response: bool = False):
+    def add_many(self, data: object,json_response: bool = True, section : str = None):
         return self._check_error(
             self._send(
                 {
@@ -123,9 +122,11 @@ class PysonDBClient:
             )
         )
 
-    def add_section(self,section:str = None):
-         return self._check_error(self._send({"cmd": "ADD_SECTION", "payload": {"section":self._check_section(section)}}))
-
+    def add_section(self,section:str = None,use : bool = True):
+         retval = self._check_error(self._send({"cmd": "ADD_SECTION", "payload": {"section":self._check_section(section),"use":use}}))
+         if use :
+            self._section = retval
+         return retval
 
     def get_all(self) -> str:
         return self._check_error(self._send({"cmd": "GET_ALL", "payload": ""}))
@@ -166,6 +167,7 @@ class PysonDBClient:
         self._dbname = dbname
         if section != None:
             self._section = section
+         
 
     def use_section(self,section:str):
         if section == self._section:

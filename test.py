@@ -1,81 +1,289 @@
 
 
 from pysondb.client import PysonDBClient
+
 import uuid
 
 HOST, PORT = "localhost", 9999
+
+payload =   [{
+      "type": "action.devices.types.SPRINKLER",
+      "traits": [
+        "action.devices.traits.StartStop",
+        "action.devices.traits.Timer"
+      ],
+      "name": {
+        "name": "Sprinkler1",
+        "defaultNames": [
+          "Sprinkler1"
+        ],
+        "nicknames": [
+          "Sprinkler1"
+        ]
+      },
+      "willReportState": True,
+      "roomHint": "Playground",
+      "attributes": {
+        "pausable": True,
+        "availableZones": [],
+        "maxTimerLimitSec": 1200,
+        "commandOnlyTimer": False
+      },
+      "states": {
+        "online": True,
+        "onlineStatusDetails": "STATE_UNSPECIFIED",
+        "timerRemainingSec": 940,
+        "timerPaused": False,
+        "isPaused": False,
+        "isRunning": True,
+        "activeZones": [],
+        "expectedStartStopCompletionUnixTimestampSec": 0
+      },
+      "suv": {
+        "enabled": False,
+        "challengeType": "pinNeeded",
+        "pincode": "1234",
+        "allowRetry": False,
+        "rejectErrorCode": "pinIncorrect"
+      }
+    },
+    {
+      "type": "action.devices.types.LIGHT",
+      "traits": [
+        "action.devices.traits.OnOff",
+        "action.devices.traits.Brightness",
+        "action.devices.traits.ColorSetting",
+        "action.devices.traits.LightEffects"
+      ],
+      "name": {
+        "name": "light2",
+        "nicknames": [
+          "light2"
+        ]
+      },
+      "willReportState": True,
+      "roomHint": "Playground",
+      "attributes": {
+        "commandOnlyOnOff": False,
+        "queryOnlyOnOff": False,
+        "commandOnlyBrightness": False,
+        "commandOnlyColorSetting": False,
+        "colorModel": "rgb",
+        "colorTemperatureRange": {
+          "temperatureMinK": 2000,
+          "temperatureMaxK": 9000
+        },
+        "defaultSleepDuration": 1800,
+        "defaultWakeDuration": 1800,
+        "supportedEffects": [
+          "colorLoop",
+          "wake",
+          "sleep"
+        ]
+      },
+      "states": {
+        "online": True,
+        "onlineStatusDetails": "STATE_UNSPECIFIED",
+        "brightness": 100,
+        "color": {
+          "temperatureK": 7500
+        },
+        "activeLightEffect": "",
+        "lightEffectEndUnixTimestampSec": 0,
+        "id": "",
+        "activeEmulatedLightEffect": "",
+        "emulatedLightEffectEndUnixTimestampSec": 0,
+        "expectedEmulatedEffectBrightness": {},
+        "expectedEmulatedEffectColorSetting": {},
+        "on": False
+      },
+      "suv": {
+        "enabled": False,
+        "challengeType": "pinNeeded",
+        "pincode": "1234",
+        "allowRetry": False,
+        "rejectErrorCode": "pinIncorrect"
+      }
+    },
+    {
+      "type": "action.devices.types.OUTLET",
+      "traits": [
+        "action.devices.traits.OnOff"
+      ],
+      "name": {
+        "name": "outlet1",
+        "nicknames": [
+          "outlet1"
+        ]
+      },
+      "willReportState": True,
+      "roomHint": "Playground",
+      "attributes": {
+        "commandOnlyOnOff": False,
+        "queryOnlyOnOff": False
+      },
+      "states": {
+        "online": True,
+        "onlineStatusDetails": "STATE_UNSPECIFIED",
+        "on": True,
+        "brightness": 83
+      },
+      "suv": {
+        "enabled": False,
+        "challengeType": "pinNeeded",
+        "pincode": "1234",
+        "allowRetry": False,
+        "rejectErrorCode": "pinIncorrect"
+      }
+    },
+    {
+      "type": "action.devices.types.OUTLET",
+      "traits": [
+        "action.devices.traits.OnOff"
+      ],
+      "name": {
+        "name": "outlet1",
+        "nicknames": [
+          "outlet1"
+        ]
+      },
+      "willReportState": True,
+      "roomHint": "Playground",
+      "attributes": {
+        "commandOnlyOnOff": False,
+        "queryOnlyOnOff": False
+      },
+      "states": {
+        "online": True,
+        "onlineStatusDetails": "STATE_UNSPECIFIED",
+        "on": True,
+        "brightness": 83
+      },
+      "suv": {
+        "enabled": False,
+        "challengeType": "pinNeeded",
+        "pincode": "1234",
+        "allowRetry": False,
+        "rejectErrorCode": "pinIncorrect"
+      }
+    },
+    {
+      "type": "action.devices.types.OUTLET",
+      "traits": [
+        "action.devices.traits.OnOff"
+      ],
+      "name": {
+        "name": "outlet1",
+        "nicknames": [
+          "outlet1"
+        ]
+      },
+      "willReportState": True,
+      "roomHint": "Playground",
+      "attributes": {
+        "commandOnlyOnOff": False,
+        "queryOnlyOnOff": False
+      },
+      "states": {
+        "online": True,
+        "onlineStatusDetails": "STATE_UNSPECIFIED",
+        "on": True,
+        "brightness": 83
+      },
+      "suv": {
+        "enabled": False,
+        "challengeType": "pinNeeded",
+        "pincode": "1234",
+        "allowRetry": False,
+        "rejectErrorCode": "pinIncorrect"
+      }
+    },
+    {
+      "type": "action.devices.types.OUTLET",
+      "traits": [
+        "action.devices.traits.OnOff"
+      ],
+      "name": {
+        "name": "outlet1",
+        "nicknames": [
+          "outlet1"
+        ]
+      },
+      "willReportState": True,
+      "roomHint": "Playground",
+      "attributes": {
+        "commandOnlyOnOff": False,
+        "queryOnlyOnOff": False
+      },
+      "states": {
+        "online": True,
+        "onlineStatusDetails": "STATE_UNSPECIFIED",
+        "on": True,
+        "brightness": 83
+      },
+      "suv": {
+        "enabled": False,
+        "challengeType": "pinNeeded",
+        "pincode": "1234",
+        "allowRetry": False,
+        "rejectErrorCode": "pinIncorrect"
+      }
+    },
+    {
+      "type": "action.devices.types.OUTLET",
+      "traits": [
+        "action.devices.traits.OnOff"
+      ],
+      "name": {
+        "name": "outlet1",
+        "nicknames": [
+          "outlet1"
+        ]
+      },
+      "willReportState": True,
+      "roomHint": "Playground",
+      "attributes": {
+        "commandOnlyOnOff": False,
+        "queryOnlyOnOff": False
+      },
+      "states": {
+        "online": True,
+        "onlineStatusDetails": "STATE_UNSPECIFIED",
+        "on": True,
+        "brightness": 83
+      },
+      "suv": {
+        "enabled": False,
+        "challengeType": "pinNeeded",
+        "pincode": "1234",
+        "allowRetry": False,
+        "rejectErrorCode": "pinIncorrect"
+      }
+    }
+]
 
 
 generator = "lambda: str(uuid.uuid4())"
 #generator = "lambda: str(int(uuid.uuid4()))[:18]"
 
 def main() -> int:
-
-    #f = eval(generator)
-    #print (f())
-    #return 0
     s = PysonDBClient(HOST, PORT)
-    s.connect()
-    ok = True
+    ok = s.connect()
     while ok:
         print('?: ')
         data = input()
         if len(data) > 0:
-
             ok = data != "done"
             if ok:
-                #s.create_db("testfile3",True,True)
-                #print(s.add_section("test2"))
-                s.use_db("testfile3","test2")
-                #s.use_section("test2")
-                #print(s.add_new_key("first"))
-                #print(s.add_new_key("last"))
+                print (s.use_db("testfile3","google_devices"))
                 print (s.set_id_generator(generator))
-                print(s.add({"first":"Bill","last":"Smith"}))
-                print(s.add({"first":"Bill","last":"Davis"}))
-                print(s.add({"first":"Bill","last":"Harrison"}))
-                print (s.update_by_query(query = "lambda x: x['first'] == 'Bill'",new_data = {'last':'Nye'}))
-                print (s.get_by_query(query = "lambda x: x['first'] == 'Bill'"))
-                print (s.delete_by_query(query = "lambda x: x['first'] == 'Bill'"))
+                ids = s.add_many(payload)
+                for id in ids: 
+                    print (s.get_by_id(id))
+                print (s.get_all_by_section())
     s.close()
 
 if __name__ == "__main__":
     main()
 
 
-"""
-
-{
-    "version": 2,
-    "keys": {
-        "test2": [
-            "first",
-            "last"
-        ]
-    },
-    "test2": {
-        "263512584592280692": {
-            "first": "Bill",
-            "last": "Nye"
-        },
-        "150640287217051014": {
-            "first": "Bill",
-            "last": "Nye"
-        },
-        "846464917529999116": {
-            "first": "Bill",
-            "last": "Nye"
-        },
-        "301532115955613905": {
-            "first": "Bill",
-            "last": "Nye"
-        },
-        "812041525185350293": {
-            "first": "Bill",
-            "last": "Nye"
-        }
-    }
-}
-
-
-"""
