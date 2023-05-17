@@ -4,12 +4,14 @@ from concurrent.futures import thread
 import socket, sys
 from threading import Thread
 import time
-
+import zlib
+from base64 import urlsafe_b64encode as b64e, urlsafe_b64decode as b64d
 
 from typing import List
 from typing import Optional
 from typing import Union
 from typing import Dict
+from pysondb.utils import Crypt
 
 from pysondb.db_types import DBSchemaType
 from pysondb.db_types import IdGeneratorType
@@ -25,6 +27,7 @@ from pysondb.errors import SectionNotFoundError
 from pysondb.errors import SectionAlreadExistsError
 from pysondb.errors import DatabaseNotFoundError
 from pysondb.errors import MalformedQueryError
+from pysondb.errors import InvalidUserError
 
 
 try:
@@ -43,6 +46,11 @@ class PysonDBClient:
         self._wait = wait
         self._dbname = None
         self._section = None
+        self._auth = None
+        self._user = None
+        self._passwd = None
+        self._encrypt = True
+        self._crypt = Crypt()
 
     def _check_error(self, val):
         if val["error"] == "NoError":
@@ -66,29 +74,52 @@ class PysonDBClient:
             data += self._sock.recv(MAX_BUF)
             loop -= 1
         data += self._sock.recv(len % MAX_BUF)
-        return data.decode("utf-8")
+        if self._encrypt:
+            data = self._crypt.password_decrypt(data, self._passwd)
+        return data
 
-    def _send(self, data: object, check: bool = True) -> str:
+    def _send(self, data: object, check: bool = True, auth=True) -> str:
         if self._connected:
             if check and self._dbname == None:
                 raise Exception("No database has been selected.")
-            d = json.dumps(data)
-            self._sock.sendall(bytes(d + "\n", encoding="utf8"))
+            if auth and self._auth == None:
+                raise InvalidUserError("Missing username and password.")
+            data["auth"] = self._auth
+            d = json.dumps(data).encode()
+            if self._auth == None:
+                d = self.obscure(d)
+            else:
+                if self._encrypt:
+                    d = self._crypt.password_encrypt(d, self._passwd)
+            self._sock.sendall(len(d).to_bytes(8, "big"))
+            self._sock.sendall(d)
             return json.loads(self._recvall())
         else:
             raise Exception("No Cennection")
 
-    def add(self, data: object, section: str = None) -> str:
+    def add(
+        self, data: object, ignore_missing_key: bool = False, section: str = None
+    ) -> str:
         return self._check_error(
             self._send(
                 {
                     "cmd": "ADD",
-                    "payload": {"section": self._check_section(section), "data": data},
+                    "payload": {
+                        "section": self._check_section(section),
+                        "ignore_missing_key": ignore_missing_key,
+                        "data": data,
+                    },
                 }
             )
         )
 
-    def add_many(self, data: object, json_response: bool = True, section: str = None):
+    def add_many(
+        self,
+        data: object,
+        ignore_missing_key: bool = False,
+        json_response: bool = True,
+        section: str = None,
+    ):
         return self._check_error(
             self._send(
                 {
@@ -97,6 +128,7 @@ class PysonDBClient:
                         "section": self._check_section(section),
                         "data": data,
                         "json_response": json_response,
+                        "ignore_missing_key": ignore_missing_key,
                     },
                 }
             )
@@ -123,7 +155,10 @@ class PysonDBClient:
             self._send(
                 {
                     "cmd": "ADD_SECTION",
-                    "payload": {"section": self._check_section(section), "use": use},
+                    "payload": {
+                        "section": self._check_section(section),
+                        "use": use,
+                    },
                 }
             )
         )
@@ -136,7 +171,15 @@ class PysonDBClient:
         self._sock.close()
         self._connected = False
 
-    def connect(self, retries=5) -> bool:
+    def obscure(self, data: bytes) -> bytes:
+        return b64e(zlib.compress(data, 9))
+
+    def unobscure(self, obscured: bytes) -> bytes:
+        return zlib.decompress(b64d(obscured))
+
+    def connect(
+        self, username: str, password: str, encrypt: bool = True, retries=5
+    ) -> bool:
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if not self._connected:
             rCount = 0
@@ -147,6 +190,27 @@ class PysonDBClient:
             except:
                 time.sleep(self._wait)
                 rCount += 1
+        if self._connected:
+            self._user = username
+            self._passwd = password
+            self._encrypt = encrypt
+            enc = str(
+                self.obscure(json.dumps({"u": username, "p": password}).encode("utf-8"))
+            )
+            self._auth = self._check_error(
+                self._send(
+                    {
+                        "cmd": "AUTH",
+                        "payload": {
+                            "credentials": enc,
+                            "encrypt": encrypt,
+                        },
+                    },
+                    False,
+                    False,
+                )
+            )
+
         return self._connected
 
     def create_db(self, dbname: str, use: bool = True, force: bool = False):
@@ -154,7 +218,11 @@ class PysonDBClient:
             self._send(
                 {
                     "cmd": "CREATE_DB",
-                    "payload": {"dbname": dbname, "use": use, "force": force},
+                    "payload": {
+                        "dbname": dbname,
+                        "use": use,
+                        "force": force,
+                    },
                 },
                 False,
             )
@@ -167,7 +235,10 @@ class PysonDBClient:
             self._send(
                 {
                     "cmd": "DELETE_BY_ID",
-                    "payload": {"section": self._check_section(section), "id": id},
+                    "payload": {
+                        "section": self._check_section(section),
+                        "id": id,
+                    },
                 }
             )
         )
